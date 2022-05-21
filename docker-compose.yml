@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+  app:
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./kanalservis:/app
+    command: sh -c "python manage.py runserver 127.0.0.1:8000"
+    environment:
+      - DEBUG=1

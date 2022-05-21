@@ -1,0 +1,15 @@
+{% extends 'app/base.html' %}
+
+{% block title %}
+My application
+{% endblock %}
+
+{% block content %}
+
+
+<div id="chart">
+   <h2>Общая сумма заказов: <strong>{{sum}} USD</strong></h2>
+   <embed type="image/svg+xml" src= {{ chart|safe }} />
+</div>
+
+{% endblock %}
