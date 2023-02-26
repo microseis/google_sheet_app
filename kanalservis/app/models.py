@@ -1,8 +1,6 @@
 from django.db import models
 
 
-# Create your models here.
-
 class Order(models.Model):
     ord_id = models.PositiveIntegerField(
         verbose_name="№",
@@ -17,12 +15,8 @@ class Order(models.Model):
     )
     ord_date = models.DateField(
         verbose_name="Срок поставки",
-
     )
-    ord_cost_rub = models.FloatField(
-        verbose_name="Стоимость, руб.",
-        null=True
-    )
+    ord_cost_rub = models.FloatField(verbose_name="Стоимость, руб.", null=True)
 
     class Meta:
         verbose_name = "Заказ"

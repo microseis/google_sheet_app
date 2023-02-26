@@ -1,13 +1,81 @@
-version: '3.7'
+version: '3'
 
 services:
+
+  postgres:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=${DB_USER:-user}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-password}
+      - POSTGRES_DB=${DB_NAME:-db}
+    env_file:
+      - kanalservis/.env
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    volumes:
+      - ./db:/var/lib/postgresql/data/
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - my_network
+
   app:
     build:
-      context: .
+      context: ./kanalservis
+    volumes:
+      - static_data:/var/www/static
     ports:
       - "8000:8000"
+    command:
+      - sh -c "python manage.py bot"
+    env_file:
+      - kanalservis/.env
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - my_network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    env_file:
+      - kanalservis/.env
+    ports:
+      - '5050:5050'
+    restart: unless-stopped
     volumes:
-      - ./kanalservis:/app
-    command: sh -c "python manage.py runserver 127.0.0.1:8000"
+      - pgadmin:/root/.pgadmin
+    networks:
+      - my_network
+    depends_on:
+      - postgres
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./configs:/etc/nginx/conf.d:ro
+      - static_data:/var/www/static
+    depends_on:
+      - postgres
+    ports:
+      - "80:80"
+    networks:
+      - my_network
+    links:
+      - app
     environment:
-      - DEBUG=1
+      NGINX_SET_REAL_IPS_FROM: "[\"172.17.0.0/16\", \"192.168.0.10\"]"
+
+volumes:
+  static_data:
+  pgadmin:
+
+networks:
+  my_network:
+    driver: bridge
+    external: True

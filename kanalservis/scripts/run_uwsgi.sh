@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 set -e
 
@@ -12,7 +12,6 @@ python manage.py makemigrations app
 
 python manage.py migrate --noinput
 
-uwsgi --socket :8000 --master  --module kanalservis.wsgi
+chown www-data:www-data /var/log
 
-echo "Telebot launching"
-python manage.py bot
+uwsgi --strict --ini /opt/app/uwsgi/uwsgi.ini
